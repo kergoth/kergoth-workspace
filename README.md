@@ -54,6 +54,10 @@ $ attach-workspace yocto/sumo/yocto-1234
 - [ ] Split out workspace-name to be used by list-workspaces as well as
     attach-workspace
 - [ ] list-workspaces: use workspace-name
+- [ ] new-workspace: adjust name relative to project root, if the new
+    workspace directory is relative to it. I.e. 'elm$ new-workspace test'
+    should result in an `elm/test` workspace, assuming pwd is
+    `<project_root>/elm`. Can I make that extensible?
 - [ ] list-workspaces: add sorting
   - [ ] Prioritize existing sessions
 - [ ] Implement workspace-picker: `list-workspaces | fzf`
