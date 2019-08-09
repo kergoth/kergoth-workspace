@@ -18,8 +18,12 @@ usage() {
 }
 
 new=0
-while getopts nh opt; do
+kill=0
+while getopts knh opt; do
     case "$opt" in
+        k)
+            kill=1
+            ;;
         n)
             new=1
             ;;
@@ -43,7 +47,14 @@ fi
 
 case "$workspace" in
     /*)
-        name=
+        case "$workspace" in
+            "$WORKSPACE_PROJECT_ROOT/"*)
+                name="${workspace#$WORKSPACE_PROJECT_ROOT/}"
+                ;;
+            *)
+                name="${workspace##*/}"
+                ;;
+        esac
         ;;
     *)
         name="$workspace"
@@ -63,25 +74,16 @@ if ! [ -e "$workspace/.workspace" ]; then
     die 'Specified workspace `%s` is not recognized' "$workspace"
 fi
 
-if [ -z "$name" ]; then
-    case "$workspace" in
-        "$WORKSPACE_PROJECT_ROOT/"*)
-            name="${workspace#$WORKSPACE_PROJECT_ROOT/}"
-            ;;
-        *)
-            name="${workspace##*/}"
-            ;;
-    esac
-fi
-
 if [ -e "$workspace/.workspace-setup" ]; then
     set -- "$workspace/.workspace-setup"
 fi
 
-if [ $new -eq 1 ]; then
+if [ $new -eq 1 ] || [ $kill -eq 1 ]; then
     if [ -n "$WORKSPACE_KILL_SESSION" ]; then
         command $WORKSPACE_KILL_SESSION "$name"
     fi
 fi
 
-command $WORKSPACE_ATTACH "$name" "$SHELL" vimsession "$@"
+if [ $kill -eq 0 ]; then
+    command $WORKSPACE_ATTACH "$name" "$SHELL" vimsession "$@"
+fi

@@ -1,0 +1,7 @@
+#!/bin/sh
+# shellcheck disable=SC2016
+
+# shellcheck source=./common-workspace
+. "$(dirname "$0")/common-workspace"
+
+attach-workspace -k "$@"
