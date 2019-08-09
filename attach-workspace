@@ -70,7 +70,7 @@ if [ -e "$workspace/.workspace-setup" ]; then
 fi
 
 if [ $new -eq 1 ]; then
-    tmux ls|grep "group $name)"|cut -d: -f1|tr '\n' '\0'|xargs -n 1 -0 tmux kill-session -t
+    tmux-kill-session-group "$name"
 fi
 
 command "$WORKSPACE_ATTACH" "$name" "$SHELL" vimsession "$@"
