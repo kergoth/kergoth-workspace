@@ -89,6 +89,8 @@ if [ $new -eq 1 ] || [ $kill -eq 1 ]; then
     fi
 fi
 
+cd "$workspace"
+
 if [ $kill -eq 0 ]; then
     command $WORKSPACE_ATTACH "$name" "$SHELL" vimsession "$@"
 fi
