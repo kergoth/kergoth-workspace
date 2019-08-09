@@ -13,7 +13,12 @@ die() {
 }
 
 usage() {
-    echo >&2 "${0##*/} WORKSPACE_NAME_OR_PATH"
+    echo >&2 "${0##*/} [options] WORKSPACE_NAME_OR_PATH"
+    echo >&2
+    echo >&2 "Options:"
+    echo >&2
+    echo >&2 "  -n  Force a new session, kill any existing sessions for this workspace"
+    echo >&2 "  -k  Only kill any existing sessions for this workspace"
     exit 2
 }
 
