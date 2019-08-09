@@ -67,4 +67,4 @@ if [ -n "$WORKSPACE_SETUP_SCRIPT" ]; then
     fi
 fi
 
-attach-workspace "$project_root/$name"
+attach-workspace -n "$project_root/$name"

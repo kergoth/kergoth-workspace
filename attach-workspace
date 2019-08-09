@@ -17,8 +17,12 @@ usage() {
     exit 2
 }
 
-while getopts h opt; do
+new=0
+while getopts nh opt; do
     case "$opt" in
+        n)
+            new=1
+            ;;
         \? | h)
             usage
             ;;
@@ -64,4 +68,9 @@ fi
 if [ -e "$workspace/.workspace-setup" ]; then
     set -- "$workspace/.workspace-setup"
 fi
+
+if [ $new -eq 1 ]; then
+    tmux ls|grep "group $name)"|cut -d: -f1|tr '\n' '\0'|xargs -n 1 -0 tmux kill-session -t
+fi
+
 command "$WORKSPACE_ATTACH" "$name" "$SHELL" vimsession "$@"
