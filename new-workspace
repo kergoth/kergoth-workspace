@@ -38,6 +38,8 @@ fi
 
 name="$1"
 shift
+project_root="$PWD"
+attach-workspace -k "$project_root/$name"
 if [ -e "$name" ] || [ -h "$name" ]; then
     if [ $force -eq 1 ]; then
         rm -rf "$name"
@@ -46,7 +48,6 @@ if [ -e "$name" ] || [ -h "$name" ]; then
     fi
 fi
 
-project_root="$PWD"
 mkdir -p "$name" || die
 echo "$name" >"$name/.workspace"
 cd "$name" || die
