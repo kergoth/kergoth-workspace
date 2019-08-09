@@ -31,7 +31,6 @@ fi
 cd "$WORKSPACE_PROJECT_ROOT" || die
 found=0
 # shellcheck disable=SC2086
-command $WORKSPACE_LIST
 for dir in $WORKSPACE_PROJECT_PATTERN; do
     if [ -e "$dir/.workspace" ]; then
         echo "$dir"
