@@ -61,7 +61,8 @@ if [ -n "$WORKSPACE_SETUP_SCRIPT" ]; then
     fi
     if [ -e "$WORKSPACE_SETUP_SCRIPT" ]; then
         echo '#!/bin/sh' >.workspace-setup
-        echo "$WORKSPACE_SETUP_SCRIPT" >>.workspace-setup
+        echo "topdir=$project_root" >>.workspace-setup
+        echo ". $WORKSPACE_SETUP_SCRIPT" >>.workspace-setup
         chmod +x ./.workspace-setup
         set -- "$@" ./.workspace-setup
     fi
