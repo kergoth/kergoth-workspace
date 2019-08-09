@@ -37,13 +37,22 @@ fi
 workspace="$1"
 shift
 
+if [ -z "$WORKSPACE_PROJECT_ROOT" ]; then
+    WORKSPACE_PROJECT_ROOT="$PWD"
+fi
+
 case "$workspace" in
     /*)
         name=
         ;;
     *)
         name="$workspace"
-        workspace="$WORKSPACE_PROJECT_ROOT/$workspace"
+        listed="$(list-workspaces | grep "/$workspace$" | head -n 1)"
+        if [ -n "$listed" ]; then
+            workspace="$WORKSPACE_PROJECT_ROOT/$listed"
+        else
+            workspace="$WORKSPACE_PROJECT_ROOT/$workspace"
+        fi
         ;;
 esac
 
