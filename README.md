@@ -54,13 +54,9 @@ $ attach-workspace yocto/sumo/yocto-1234
 - [ ] Split out workspace-name to be used by list-workspaces as well as
     attach-workspace
 - [ ] list-workspaces: use workspace-name
-- [ ] list-workspaces: de-dupe `$WORKSPACE_LIST` with
-    `$WORKSPACE_PROJECT_PATTERN`
 - [ ] list-workspaces: add sorting
+  - [ ] Prioritize existing sessions
 - [ ] Implement workspace-picker: `list-workspaces | fzf`
+  - [ ] Use `WORKSPACE_PICKER_MARKUP` to add extra info to session lines
 - [ ] Consider optional workspace registry as an alternative to the
     root+pattern approach to locating projects
-- [ ] Make the commands for the session configurable?
-- [ ] attach-workspace: allow a path-based subset match. If the exact name
-    doesn't exist, check if the specified name is a trailing subdirectory.
-    I.e. match `yocto-1234` of `yocto/sumo/yocto-1234`
