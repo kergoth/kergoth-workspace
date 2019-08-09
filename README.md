@@ -1,0 +1,66 @@
+# kergoth-workspace
+
+Very simple scripts used to manage my workspaces for work. I prefer to create
+a new development workspace for each major development task to keep changes
+isolated, particularly when the project consists of multiple repositories.
+These little scripts ease this workflow for my purposes.
+
+## Environment variables
+
+```sh
+WORKSPACE_SETUP_SCRIPT=./workspace-setup
+WORKSPACE_PROJECT_ROOT=~/Projects
+WORKSPACE_PROJECT_PATTERN="*"
+# The attach script is assumed to attach if the session exists,
+# or create if it does not. The first argument is session name,
+# optional additional arguments are commands to run in the session.
+WORKSPACE_ATTACH="tmx"
+WORKSPACE_LIST="tmx -l"
+```
+
+## Scripts
+
+- new-workspace: given a workspace name, create the workspace in the current
+  directory, under the specified name, and if it does not exist or has not
+  been set up, run the setup script. We look for the setup script relative to
+  `$PWD` and the project root.
+- list-workspaces: list the known workspaces using the project root and
+  pattern, as well as the list command. paths are relative to
+  `WORKSPACE_PROJECT_ROOT` if it's not empty, otherwise it shows absolute
+  paths
+- attach-workspace: given a workspace name, attach to an existing session or
+  create a new session. requires the workspace exist
+- workspace-picker: use fzf to interactively select and attach a workspace
+
+## Example
+
+```sh
+$ export WORKSPACE_PROJECT_PATTERN="*/*/*"
+$ cd ~/Projects/yocto/sumo
+$ cat workspace-setup
+#!/bin/sh
+git clone https://github.com/openembedded/bitbake
+git clone https://github.com/openembedded/openembedded-core oe-core
+. ./oe-core/oe-init-build-env build bitbake
+# echo 'BUILDDIR="cd "$(dirname "$0")" && pwd -P)"'>build/setup-environment
+$ new-workspace yocto-1234
+$ list-workspaces
+yocto/sumo/yocto-1234
+$ attach-workspace yocto/sumo/yocto-1234
+```
+
+## TODO
+
+- [ ] Split out workspace-name to be used by list-workspaces as well as
+    attach-workspace
+- [ ] list-workspaces: use workspace-name
+- [ ] list-workspaces: de-dupe `$WORKSPACE_LIST` with
+    `$WORKSPACE_PROJECT_PATTERN`
+- [ ] list-workspaces: add sorting
+- [ ] Implement workspace-picker: `list-workspaces | fzf`
+- [ ] Consider optional workspace registry as an alternative to the
+    root+pattern approach to locating projects
+- [ ] Make the commands for the session configurable?
+- [ ] attach-workspace: allow a path-based subset match. If the exact name
+    doesn't exist, check if the specified name is a trailing subdirectory.
+    I.e. match `yocto-1234` of `yocto/sumo/yocto-1234`

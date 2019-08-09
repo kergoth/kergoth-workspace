@@ -1,0 +1,70 @@
+#!/bin/sh
+
+# shellcheck source=./common-workspace
+. "$(dirname "$0")/common-workspace"
+
+die() {
+    fmt="${1:-ERROR}"
+    shift
+    # shellcheck disable=SC2059
+    printf >&2 "$fmt" "$@"
+    exit 1
+}
+
+usage() {
+    echo >&2 "${0##*/} [options] WORKSPACE_NAME"
+    echo >&2
+    echo >&2 "Options:"
+    echo >&2 "  -f  Force. Removes any existing workspace of this name."
+    exit 2
+}
+
+force=0
+while getopts fh opt; do
+    case "$opt" in
+        f)
+            force=1
+            ;;
+        \? | h)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -eq 0 ]; then
+    usage
+fi
+
+name="$1"
+shift
+if [ -e "$name" ] || [ -h "$name" ]; then
+    if [ $force -eq 1 ]; then
+        rm -rf "$name"
+    else
+        die "Workspace %s already exists" "$name"
+    fi
+fi
+
+project_root="$PWD"
+mkdir -p "$name" || die
+echo "$name" >"$name/.workspace"
+cd "$name" || die
+
+if [ -n "$WORKSPACE_SETUP_SCRIPT" ]; then
+    if [ ! -e "$WORKSPACE_SETUP_SCRIPT" ]; then
+        if [ -e "$project_root/$WORKSPACE_SETUP_SCRIPT" ]; then
+            WORKSPACE_SETUP_SCRIPT="$project_root/$WORKSPACE_SETUP_SCRIPT"
+        elif [ -e "$WORKSPACE_PROJECT_ROOT/$WORKSPACE_SETUP_SCRIPT" ]; then
+            WORKSPACE_SETUP_SCRIPT="$WORKSPACE_PROJECT_ROOT/$WORKSPACE_SETUP_SCRIPT"
+        fi
+    fi
+    if [ -e "$WORKSPACE_SETUP_SCRIPT" ]; then
+        echo '#!/bin/sh' >.workspace-setup
+        echo "$WORKSPACE_SETUP_SCRIPT" >>.workspace-setup
+        chmod +x ./.workspace-setup
+        set -- "$@" ./.workspace-setup
+    fi
+fi
+
+attach-workspace "$project_root/$name"

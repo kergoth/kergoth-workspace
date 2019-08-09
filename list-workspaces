@@ -1,0 +1,41 @@
+#!/bin/sh
+# shellcheck disable=SC2016
+
+# shellcheck source=./common-workspace
+. "$(dirname "$0")/common-workspace"
+
+die() {
+    fmt="${1:-ERROR}"
+    shift
+    # shellcheck disable=SC2059
+    printf >&2 "$fmt" "$@"
+    exit 1
+}
+
+if [ $# -ne 0 ]; then
+    die "Invalid argument"
+fi
+
+if [ -n "$WORKSPACE_PROJECT_ROOT" ]; then
+    if ! [ -e "$WORKSPACE_PROJECT_ROOT" ]; then
+        die 'WORKSPACE_PROJECT_ROOT `%s` does not exist' "$WORKSPACE_PROJECT_ROOT"
+    fi
+else
+    WORKSPACE_PROJECT_ROOT="$PWD"
+fi
+
+if [ -z "$WORKSPACE_PROJECT_PATTERN" ]; then
+    die "WORKSPACE_PROJECT_PATTERN must be set to a shell wildcard matching project paths, relative to WORKSPACE_PROJECT_ROOT"
+fi
+
+cd "$WORKSPACE_PROJECT_ROOT" || die
+found=0
+# shellcheck disable=SC2086
+command "$WORKSPACE_LIST"
+for dir in $WORKSPACE_PROJECT_PATTERN; do
+    if [ -e "$dir/.workspace" ]; then
+        echo "$dir"
+        found=1
+    fi
+done
+test $found -eq 1

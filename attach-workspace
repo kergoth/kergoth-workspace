@@ -1,0 +1,67 @@
+#!/bin/sh
+# shellcheck disable=SC2016
+
+# shellcheck source=./common-workspace
+. "$(dirname "$0")/common-workspace"
+
+die() {
+    fmt="${1:-ERROR}"
+    shift
+    # shellcheck disable=SC2059
+    printf >&2 "$fmt" "$@"
+    exit 1
+}
+
+usage() {
+    echo >&2 "${0##*/} WORKSPACE_NAME_OR_PATH"
+    exit 2
+}
+
+while getopts h opt; do
+    case "$opt" in
+        \? | h)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -eq 0 ]; then
+    usage
+fi
+
+workspace="$1"
+shift
+
+case "$workspace" in
+    /*)
+        name=
+        ;;
+    *)
+        name="$workspace"
+        workspace="$WORKSPACE_PROJECT_ROOT/$workspace"
+        ;;
+esac
+
+if ! [ -d "$workspace" ]; then
+    die 'Specified workspace `%s` does not exist' "$workspace"
+fi
+if ! [ -e "$workspace/.workspace" ]; then
+    die 'Specified workspace `%s` is not recognized' "$workspace"
+fi
+
+if [ -z "$name" ]; then
+    case "$workspace" in
+        "$WORKSPACE_PROJECT_ROOT/"*)
+            name="${workspace#$WORKSPACE_PROJECT_ROOT/}"
+            ;;
+        *)
+            name="${workspace##*/}"
+            ;;
+    esac
+fi
+
+if [ -e "$workspace/.workspace-setup" ]; then
+    set -- "$workspace/.workspace-setup"
+fi
+command "$WORKSPACE_ATTACH" "$name" "$SHELL" vimsession "$@"
