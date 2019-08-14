@@ -1,0 +1,11 @@
+#!/bin/sh
+if [ -d "$topdir/.repo" ]; then
+    cp -a "$topdir/.repo" .
+    repo sync
+elif [ -d "$topdir/.git" ]; then
+    cp -a "$topdir/.git" .
+    git checkout -f .
+elif [ -f "$topdir/.mrconfig" ]; then
+    cp -a "$topdir/.mrconfig" .
+    mr checkout
+fi

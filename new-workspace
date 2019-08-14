@@ -49,6 +49,7 @@ if [ "$1" = "--" ]; then
     shift
 fi
 
+scriptdir="$(cd "$(dirname "$0")" && pwd -P)"
 project_root="$PWD"
 attach-workspace -k "$project_root/$name"
 if [ -e "$name" ] || [ -h "$name" ]; then
@@ -69,6 +70,8 @@ if [ -n "$WORKSPACE_SETUP_SCRIPT" ]; then
             WORKSPACE_SETUP_SCRIPT="$project_root/$WORKSPACE_SETUP_SCRIPT"
         elif [ -e "$WORKSPACE_PROJECT_ROOT/$WORKSPACE_SETUP_SCRIPT" ]; then
             WORKSPACE_SETUP_SCRIPT="$WORKSPACE_PROJECT_ROOT/$WORKSPACE_SETUP_SCRIPT"
+        else
+            WORKSPACE_SETUP_SCRIPT="$scriptdir/setup-workspace-default"
         fi
     fi
     if [ -e "$WORKSPACE_SETUP_SCRIPT" ]; then
