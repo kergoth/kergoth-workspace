@@ -3,6 +3,14 @@
 # shellcheck source=./common-workspace
 . "$(dirname "$0")/common-workspace"
 
+usage() {
+    echo >&2 "${0##*/} [options] WORKSPACE_NAME"
+    echo >&2
+    echo >&2 "Options:"
+    echo >&2 "  -f  Force. Removes any existing workspace of this name."
+    exit 2
+}
+
 die() {
     fmt="${1:-ERROR}"
     shift
@@ -11,12 +19,8 @@ die() {
     exit 1
 }
 
-usage() {
-    echo >&2 "${0##*/} [options] WORKSPACE_NAME"
-    echo >&2
-    echo >&2 "Options:"
-    echo >&2 "  -f  Force. Removes any existing workspace of this name."
-    exit 2
+quoted_args() {
+    python3 -c 'import sys,shlex; print(" ".join(shlex.quote(a) for a in sys.argv[1:]))' "$@"
 }
 
 force=0
@@ -36,8 +40,15 @@ if [ $# -eq 0 ]; then
     usage
 fi
 
+printargs "$@"
+
 name="$1"
 shift
+
+if [ "$1" = "--" ]; then
+    shift
+fi
+
 project_root="$PWD"
 attach-workspace -k "$project_root/$name"
 if [ -e "$name" ] || [ -h "$name" ]; then
@@ -63,9 +74,9 @@ if [ -n "$WORKSPACE_SETUP_SCRIPT" ]; then
     if [ -e "$WORKSPACE_SETUP_SCRIPT" ]; then
         echo '#!/bin/sh' >.workspace-setup
         echo "topdir=$project_root" >>.workspace-setup
-        echo ". $WORKSPACE_SETUP_SCRIPT && rm -f \"$0\" || exit $?" >>.workspace-setup
+        printf 'set -- %s\n' "$(quoted_args "$@")" >>.workspace-setup
+        printf '. "%s" "$@" && rm -f "$0"\n' "$WORKSPACE_SETUP_SCRIPT" >>.workspace-setup
         chmod +x ./.workspace-setup
-        set -- "$@" ./.workspace-setup
     fi
 fi
 
