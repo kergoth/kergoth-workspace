@@ -40,8 +40,6 @@ if [ $# -eq 0 ]; then
     usage
 fi
 
-printargs "$@"
-
 name="$1"
 shift
 
