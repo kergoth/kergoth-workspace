@@ -85,12 +85,12 @@ fi
 
 if [ $new -eq 1 ] || [ $kill -eq 1 ]; then
     if [ -n "$WORKSPACE_KILL_SESSION" ]; then
-        command $WORKSPACE_KILL_SESSION "$name"
+        command "$WORKSPACE_KILL_SESSION" "$name"
     fi
 fi
 
-cd "$workspace"
+cd "$workspace" || exit 1
 
 if [ $kill -eq 0 ]; then
-    command $WORKSPACE_ATTACH "$name" "$SHELL" vimsession "$@"
+    command "$WORKSPACE_ATTACH" "$name" "$SHELL" vimsession "$@"
 fi
