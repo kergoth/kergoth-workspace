@@ -99,5 +99,8 @@ fi
 cd "$workspace" || exit 1
 
 if [ $kill -eq 0 ]; then
-    command $WORKSPACE_ATTACH "$name" "$SHELL" 'vimsession .description' "$@"
+    if [ "${VISUAL:-$EDITOR}" = "vim" ]; then
+        set -- 'vimsession .description' "$@"
+    fi
+    command $WORKSPACE_ATTACH "$name" "$SHELL" "$@"
 fi
