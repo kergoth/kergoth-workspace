@@ -44,6 +44,9 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -eq 0 ]; then
+    if ! [ -e .workspace ]; then
+        usage
+    fi
     workspace="$PWD"
     if [ -z "$WORKSPACE_PROJECT_ROOT" ]; then
         WORKSPACE_PROJECT_ROOT="${PWD%/*}"
