@@ -1,0 +1,5 @@
+#!/bin/sh
+workspace="$(list-workspaces | fzf-tmux --ansi --no-hscroll --tiebreak=index --no-sort -0)"
+if [ -n "$workspace" ]; then
+    exec attach-workspace "$workspace"
+fi
