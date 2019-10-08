@@ -51,6 +51,12 @@ $ attach-workspace yocto/sumo/yocto-1234
 
 ## TODO
 
+- [ ] Implement project-filter. Unless passing `-a` to list-workspaces and
+    workspace-picker, only show filtered projects.
+- [ ] Implement project-add-markup/project-remove-markup support. Much like
+    a sort-decorate-unsort pattern, here we add additional info to the project
+    for use in list and picker to ease project selection, and remove it to
+    pass it to attach-workspace.
 - [ ] Split out workspace-name to be used by list-workspaces as well as
     attach-workspace
 - [ ] list-workspaces: use workspace-name
@@ -60,7 +66,5 @@ $ attach-workspace yocto/sumo/yocto-1234
     `<project_root>/elm`. Can I make that extensible?
 - [ ] list-workspaces: add sorting
   - [ ] Prioritize existing sessions
-- [ ] Implement workspace-picker: `list-workspaces | fzf`
-  - [ ] Use `WORKSPACE_PICKER_MARKUP` to add extra info to session lines
 - [ ] Consider optional workspace registry as an alternative to the
     root+pattern approach to locating projects
