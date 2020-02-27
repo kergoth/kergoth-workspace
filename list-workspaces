@@ -4,6 +4,17 @@
 # shellcheck source=./common-workspace
 . "$(dirname "$0")/common-workspace"
 
+usage() {
+    cat <<END >&2
+${0##*/} [options..] "
+
+Options:
+  -s   Sorted by attach/create date
+  -h   Show usage
+END
+    exit 2
+}
+
 die() {
     fmt="${1:-ERROR}"
     shift
@@ -11,6 +22,19 @@ die() {
     printf >&2 "$fmt" "$@"
     exit 1
 }
+
+sorted=0
+while getopts sh opt; do
+    case "$opt" in
+        s)
+            sorted=1
+            ;;
+        \? | h)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
 
 if [ $# -ne 0 ]; then
     die "Invalid argument"
@@ -28,13 +52,22 @@ if [ -z "$WORKSPACE_PROJECT_PATTERN" ]; then
     die "WORKSPACE_PROJECT_PATTERN must be set to a shell wildcard matching project paths, relative to WORKSPACE_PROJECT_ROOT"
 fi
 
+TAB="$(printf '\t')"
+
 cd "$WORKSPACE_PROJECT_ROOT" || die
-found=0
 # shellcheck disable=SC2086
 for dir in $WORKSPACE_PROJECT_PATTERN; do
     if [ -e "$dir/.workspace" ]; then
-        echo "$dir"
-        found=1
+        if [ $sorted -eq 1 ]; then
+            printf '%s\t%s\n' "$(stat -f %m "$dir/.workspace")" "$dir"
+        else
+            echo "$dir"
+        fi
     fi
-done
-test $found -eq 1
+done \
+    | if [ $sorted -eq 1 ]; then
+        sort -r -t"$TAB" -k1 \
+            | cut -d"$TAB" -f2
+    else
+        cat
+    fi
