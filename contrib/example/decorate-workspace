@@ -27,8 +27,8 @@ while read -r workspace; do
     esac
 
     if [ -e "$workspacedir/.description" ]; then
-        printf '[38;5;117m%s\t[38;5;212m%s[0m\n' "$workspace" "$(cat "$workspacedir/.description")"
+        printf '\e[38;5;117m%s\t\e[38;5;212m%s\e[0m\n' "$workspace" "$(cat "$workspacedir/.description")"
     else
-        printf '[38;5;117m%s[0m\n' "$workspace"
+        printf '\e[38;5;117m%s\e[0m\n' "$workspace"
     fi
 done
