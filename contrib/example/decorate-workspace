@@ -1,0 +1,34 @@
+#!/bin/sh
+if [ -z "$WORKSPACE_PROJECT_ROOT" ]; then
+    WORKSPACE_PROJECT_ROOT="$PWD"
+fi
+while read -r workspace; do
+    case "$workspace" in
+        /*)
+            workspacedir="$workspace"
+            case "$workspacedir" in
+                "$WORKSPACE_PROJECT_ROOT/"*)
+                    name="${workspacedir#$WORKSPACE_PROJECT_ROOT/}"
+                    ;;
+                *)
+                    name="${workspacedir##*/}"
+                    ;;
+            esac
+            ;;
+        *)
+            name="$workspace"
+            listed="$("$(dirname "$0")"/list-workspaces | grep "/$workspace$" | head -n 1)"
+            if [ -n "$listed" ]; then
+                workspacedir="$WORKSPACE_PROJECT_ROOT/$listed"
+            else
+                workspacedir="$WORKSPACE_PROJECT_ROOT/$workspace"
+            fi
+            ;;
+    esac
+
+    if [ -e "$workspacedir/.description" ]; then
+        printf '[38;5;117m%s\t[38;5;212m%s[0m\n' "$workspace" "$(cat "$workspacedir/.description")"
+    else
+        printf '[38;5;117m%s[0m\n' "$workspace"
+    fi
+done
