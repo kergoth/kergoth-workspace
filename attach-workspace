@@ -106,5 +106,6 @@ if [ $kill -eq 0 ]; then
     if [ "$VISUAL" = "vim" ] || [ "$VISUAL" = "nvim" ]; then
         set -- 'vimsession .description' "$@"
     fi
+    touch .workspace
     command $WORKSPACE_ATTACH "$name" "$SHELL" "$@"
 fi
