@@ -2,9 +2,25 @@
 
 pick_workspace () {
     list-workspaces -s -c always \
+        | if [ "$decorate" -eq 1 ]; then
+              sed -r "s/\x1B\[(([0-9]+)(;[0-9]+)*)?[m,K,H,f,J]//g"\
+                  | "$WORKSPACE_DECORATE"
+          else
+              cat
+          fi \
         | fzf-tmux --ansi --no-hscroll --tiebreak=index --no-sort -0 \
-        | sed -r "s/\x1B\[(([0-9]+)(;[0-9]+)*)?[m,K,H,f,J]//g"
+        | if [ "$decorate" -eq 1 ]; then
+              "$WORKSPACE_UNDECORATE"
+          else
+              sed -r "s/\x1B\[(([0-9]+)(;[0-9]+)*)?[m,K,H,f,J]//g"
+          fi
 }
+
+if [ -e "$WORKSPACE_DECORATE" ] && [ -e "$WORKSPACE_UNDECORATE" ]; then
+    decorate=1
+else
+    decorate=0
+fi
 
 workspace="$(pick_workspace)"
 if [ -n "$workspace" ]; then
