@@ -23,6 +23,18 @@ die() {
     exit 1
 }
 
+case "$OSTYPE" in
+    darwin*)
+        mdate() { stat -f '%m' "$@"; }
+        sort() { command sort -r "$@"; }
+        ;;
+    *)
+        mdate() { stat -c '%m' "$@"; }
+        sort() { command sort "$@"; }
+        ;;
+esac
+
+
 sorted=0
 while getopts sh opt; do
     case "$opt" in
@@ -59,14 +71,14 @@ cd "$WORKSPACE_PROJECT_ROOT" || die
 for dir in $WORKSPACE_PROJECT_PATTERN; do
     if [ -e "$dir/.workspace" ]; then
         if [ $sorted -eq 1 ]; then
-            printf '%s\t%s\n' "$(stat -f %m "$dir/.workspace")" "$dir"
+            printf '%s\t%s\n' "$(mdate "$dir/.workspace")" "$dir"
         else
             echo "$dir"
         fi
     fi
 done \
     | if [ $sorted -eq 1 ]; then
-        sort -r -t"$TAB" -k1 \
+        sort -t"$TAB" -k1 \
             | cut -d"$TAB" -f2
     else
         cat
