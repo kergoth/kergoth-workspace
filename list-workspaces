@@ -9,6 +9,7 @@ usage() {
 ${0##*/} [options..] "
 
 Options:
+  -c always|auto|never  Use color. Default: auto
   -s   Sorted by attach/create date
   -h   Show usage
 END
@@ -23,6 +24,14 @@ die() {
     exit 1
 }
 
+format() {
+    if [ "$use_color" -eq 1 ]; then
+        sed -e 's/^/[38;5;117m/; s/$/[0m/;'
+    else
+        cat
+    fi
+}
+
 case "$OSTYPE" in
     darwin*)
         mdate() { stat -f '%m' "$@"; }
@@ -34,10 +43,20 @@ case "$OSTYPE" in
         ;;
 esac
 
-
+color=auto
 sorted=0
-while getopts sh opt; do
+while getopts c:sh opt; do
     case "$opt" in
+        c)
+            color="$OPTARG"
+            case "$color" in
+                always|auto|never|"")
+                    ;;
+                *)
+                    die "Invalid value for -c. Valid values: always, auto, never"
+                    ;;
+            esac
+            ;;
         s)
             sorted=1
             ;;
@@ -49,7 +68,15 @@ done
 shift $((OPTIND - 1))
 
 if [ $# -ne 0 ]; then
-    die "Invalid argument"
+    usage
+fi
+
+if [ "$color" = always ]; then
+    use_color=1
+elif [ "$color" = auto ] && [ -t 1 ]; then
+    use_color=1
+else
+    use_color=0
 fi
 
 if [ -n "$WORKSPACE_PROJECT_ROOT" ]; then
@@ -82,4 +109,5 @@ done \
             | cut -d"$TAB" -f2
     else
         cat
-    fi
+    fi \
+    | format
