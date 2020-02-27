@@ -35,11 +35,9 @@ format() {
 case "$OSTYPE" in
     darwin*)
         mdate() { stat -f '%m' "$@"; }
-        sort() { command sort -r "$@"; }
         ;;
     *)
-        mdate() { stat -c '%m' "$@"; }
-        sort() { command sort "$@"; }
+        mdate() { stat -c '%Y' "$@"; }
         ;;
 esac
 
@@ -105,7 +103,7 @@ for dir in $WORKSPACE_PROJECT_PATTERN; do
     fi
 done \
     | if [ $sorted -eq 1 ]; then
-        sort -t"$TAB" -k1 \
+        sort -r -t"$TAB" -k1 \
             | cut -d"$TAB" -f2
     else
         cat
