@@ -8,7 +8,7 @@ pick_workspace () {
           else
               cat
           fi \
-        | fzf-tmux --ansi --no-hscroll --tiebreak=index --no-sort -0 \
+        | fzf-tmux --ansi --no-hscroll --tiebreak=index --no-sort -0 -q "$*" \
         | if [ "$decorate" -eq 1 ]; then
               "$WORKSPACE_UNDECORATE"
           else
@@ -22,7 +22,7 @@ else
     decorate=0
 fi
 
-workspace="$(pick_workspace)"
+workspace="$(pick_workspace "$@")"
 if [ -n "$workspace" ]; then
     exec attach-workspace "$workspace"
 fi
