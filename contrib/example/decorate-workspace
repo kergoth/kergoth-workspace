@@ -28,6 +28,10 @@ while read -r workspace; do
 
     if [ -s "$workspacedir/.description" ]; then
         description="$(head -n 1 "$workspacedir/.description")"
+    elif [ -s "$workspacedir/.jira-summary" ]; then
+        description="$(head -n 1 "$workspacedir/.jira-summary")"
+    elif [ -s "$workspacedir/.jira-description" ]; then
+        description="$(head -n 1 "$workspacedir/.jira-description")"
     else
         description=
     fi
