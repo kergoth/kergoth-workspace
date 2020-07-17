@@ -34,7 +34,14 @@ format() {
 
 case "$OSTYPE" in
     darwin*)
-        mdate() { stat -f '%m' "$@"; }
+        case "$(command -v stat)" in
+            */gnubin/*)
+                mdate() { stat -c '%Y' "$@"; }
+                ;;
+            *)
+                mdate() { stat -f '%m' "$@" 2>/dev/null; }
+                ;;
+        esac
         ;;
     *)
         mdate() { stat -c '%Y' "$@"; }
