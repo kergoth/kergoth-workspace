@@ -28,13 +28,17 @@ usage() {
 
 new=0
 kill=0
-while getopts knh opt; do
+picking=0
+while getopts knph opt; do
     case "$opt" in
         k)
             kill=1
             ;;
         n)
             new=1
+            ;;
+        p)
+            picking=1
             ;;
         \? | h)
             usage
@@ -107,5 +111,5 @@ if [ $kill -eq 0 ]; then
         set -- 'vimsession .description' "$@"
     fi
     touch .workspace
-    command $WORKSPACE_ATTACH "$name" "$SHELL" "$@"
+    command env WORKSPACE_PICKING="$picking" $WORKSPACE_ATTACH "$name" "$SHELL" "$@"
 fi
