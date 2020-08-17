@@ -1,0 +1,15 @@
+#!/bin/sh
+
+workspace="$1"
+shift
+
+set -x
+if [ "$TERM_PROGRAM" = vscode ]; then
+    if [ "$WORKSPACE_PICKING" = "1" ]; then
+        exec code .
+    else
+        exec tmx "$workspace"
+    fi
+else
+    exec tmx "$workspace" "$@"
+fi
