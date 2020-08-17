@@ -1,5 +1,11 @@
 #!/bin/sh
 
+case "$OSTYPE" in
+    darwin*)
+        alias sed=gsed
+        ;;
+esac
+
 sed -r "s/\x1B\[(([0-9]+)(;[0-9]+)*)?[m,K,H,f,J]//g" \
     | cut -d"$(printf '\t')" -f1 \
     | sed -e 's/ *$//'

@@ -1,9 +1,15 @@
 #!/bin/sh
 
+case "$OSTYPE" in
+    darwin*)
+        alias sed=gsed
+        ;;
+esac
+
 pick_workspace () {
     list-workspaces -s -c always \
         | if [ "$decorate" -eq 1 ]; then
-              sed -r "s/\x1B\[(([0-9]+)(;[0-9]+)*)?[m,K,H,f,J]//g"\
+              sed -r "s/\x1B\[(([0-9]+)(;[0-9]+)*)?[m,K,H,f,J]//g" \
                   | "$WORKSPACE_DECORATE"
           else
               cat
