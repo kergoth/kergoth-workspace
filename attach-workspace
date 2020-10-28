@@ -111,5 +111,5 @@ if [ $kill -eq 0 ]; then
         set -- 'vimsession .description' "$@"
     fi
     touch .workspace
-    command env WORKSPACE_PICKING="$picking" $WORKSPACE_ATTACH "$name" "$SHELL" "$@"
+    command env WORKSPACE_PICKING="$picking" WORKSPACE_NEW="$new" $WORKSPACE_ATTACH "$name" "$SHELL" "$@"
 fi
