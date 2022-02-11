@@ -94,7 +94,7 @@ if ! [ -e "$workspace/.workspace" ]; then
 fi
 
 if [ -e "$workspace/.workspace-setup" ]; then
-    set -- "$workspace/.workspace-setup"
+    set -- "\"$workspace/.workspace-setup\""
 fi
 
 if [ $new -eq 1 ] || [ $kill -eq 1 ]; then
