@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC2031
 
 # shellcheck source=./common-workspace
 . "$(dirname "$0")/common-workspace"
@@ -8,6 +9,10 @@ usage() {
     echo >&2
     echo >&2 "Options:"
     echo >&2 "  -f  Force. Removes any existing workspace of this name."
+    if [ -n "$WORKSPACE_SETUP_SCRIPT" ] && [ -e "$WORKSPACE_SETUP_SCRIPT" ]; then
+        echo >&2
+        (cd "$tmpdir" && sh "$WORKSPACE_SETUP_SCRIPT" -h) 2>&1 | sed -e 's/^/  /' >&2
+    fi
     exit 2
 }
 
