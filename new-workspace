@@ -28,6 +28,24 @@ quoted_args() {
     python3 -c 'import sys,shlex; print(" ".join(shlex.quote(a) for a in sys.argv[1:]))' "$@"
 }
 
+tmpdir="$(mktemp -d -t "${0##*/}.XXXXXX")" || exit 1
+trap 'rm -rf "$tmpdir"' EXIT INT TERM
+
+scriptdir="$(cd "$(dirname "$0")" && pwd -P)"
+project_root="$PWD"
+if [ -n "$WORKSPACE_SETUP_SCRIPT" ]; then
+    if [ ! -e "$WORKSPACE_SETUP_SCRIPT" ]; then
+        if [ -e "$project_root/$WORKSPACE_SETUP_SCRIPT" ]; then
+            WORKSPACE_SETUP_SCRIPT="$project_root/$WORKSPACE_SETUP_SCRIPT"
+        elif [ -e "$WORKSPACE_PROJECT_ROOT/$WORKSPACE_SETUP_SCRIPT" ]; then
+            WORKSPACE_SETUP_SCRIPT="$WORKSPACE_PROJECT_ROOT/$WORKSPACE_SETUP_SCRIPT"
+        else
+            WORKSPACE_SETUP_SCRIPT="$scriptdir/setup-workspace-default"
+        fi
+    fi
+fi
+WORKSPACE_SETUP_SCRIPT="$(abspath "$WORKSPACE_SETUP_SCRIPT")"
+
 force=0
 while getopts fh opt; do
     case "$opt" in
@@ -52,8 +70,6 @@ if [ "$1" = "--" ]; then
     shift
 fi
 
-scriptdir="$(cd "$(dirname "$0")" && pwd -P)"
-project_root="$PWD"
 attach-workspace -k "$project_root/$name"
 if [ -e "$name" ] || [ -h "$name" ]; then
     if [ $force -eq 1 ]; then
@@ -67,23 +83,12 @@ mkdir -p "$name" || die
 echo "$name" >"$name/.workspace"
 cd "$name" || die
 
-if [ -n "$WORKSPACE_SETUP_SCRIPT" ]; then
-    if [ ! -e "$WORKSPACE_SETUP_SCRIPT" ]; then
-        if [ -e "$project_root/$WORKSPACE_SETUP_SCRIPT" ]; then
-            WORKSPACE_SETUP_SCRIPT="$project_root/$WORKSPACE_SETUP_SCRIPT"
-        elif [ -e "$WORKSPACE_PROJECT_ROOT/$WORKSPACE_SETUP_SCRIPT" ]; then
-            WORKSPACE_SETUP_SCRIPT="$WORKSPACE_PROJECT_ROOT/$WORKSPACE_SETUP_SCRIPT"
-        else
-            WORKSPACE_SETUP_SCRIPT="$scriptdir/setup-workspace-default"
-        fi
-    fi
-    if [ -e "$WORKSPACE_SETUP_SCRIPT" ]; then
-        echo '#!/bin/sh' >.workspace-setup
-        echo "topdir='$project_root'" >>.workspace-setup
-        printf 'set -- %s\n' "$(quoted_args "$@")" >>.workspace-setup
-        printf '. "%s" "$@" && rm -f "$0"\n' "$WORKSPACE_SETUP_SCRIPT" >>.workspace-setup
-        chmod +x ./.workspace-setup
-    fi
+if [ -n "$WORKSPACE_SETUP_SCRIPT" ] && [ -e "$WORKSPACE_SETUP_SCRIPT" ]; then
+    echo '#!/bin/sh' >.workspace-setup
+    echo "topdir='$project_root'" >>.workspace-setup
+    printf 'set -- %s\n' "$(quoted_args "$@")" >>.workspace-setup
+    printf '. "%s" "$@" && rm -f "$0"\n' "$WORKSPACE_SETUP_SCRIPT" >>.workspace-setup
+    chmod +x ./.workspace-setup
 fi
 
 attach-workspace -n "$project_root/$name"
