@@ -84,7 +84,7 @@ echo "$name" >"$name/.workspace"
 cd "$name" || die
 
 if [ -n "$WORKSPACE_SETUP_SCRIPT" ] && [ -e "$WORKSPACE_SETUP_SCRIPT" ]; then
-    echo '#!/bin/sh' >.workspace-setup
+    echo '#!/bin/bash' >.workspace-setup
     echo "topdir='$project_root'" >>.workspace-setup
     printf 'set -- %s\n' "$(quoted_args "$@")" >>.workspace-setup
     printf '. "%s" "$@" && rm -f "$0"\n' "$WORKSPACE_SETUP_SCRIPT" >>.workspace-setup
