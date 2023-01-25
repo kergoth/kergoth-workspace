@@ -7,7 +7,10 @@ if [ "$TERM_PROGRAM" = vscode ] && [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
     if [ "$WORKSPACE_PICKING" = "1" ] || [ "$WORKSPACE_NEW" = "1" ]; then
         unset WORKSPACE_PICKING WORKSPACE_NEW
         tmx -d "$workspace" "$@"
-        exec code .
+        if ! [ -e NOTES.md ]; then
+            touch NOTES.md
+        fi
+        exec code . NOTES.md
     else
         exec tmx "$workspace" "$@"
     fi
