@@ -1,16 +1,38 @@
 #!/bin/sh
 
+has() {
+    for cmd; do
+        command -v "$1" >/dev/null 2>&1 || return 1
+    done
+    return 0
+}
+
 workspace="$1"
 shift
+
+if has tmux tmx; then
+    cmd=tmx
+elif has dtach dvtm att; then
+    cmd=att
+else
+    echo >&2 "Error: neither tmx nor att environments are available for session, exiting"
+    exit 1
+fi
 
 if [ "$TERM_PROGRAM" = vscode ] && [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
     if [ "$WORKSPACE_PICKING" = "1" ] || [ "$WORKSPACE_NEW" = "1" ]; then
         unset WORKSPACE_PICKING WORKSPACE_NEW
-        tmx -d "$workspace" "$@"
-        exec code .
+        if [ "$cmd" = tmx ]; then
+            tmx -d "$workspace" "$@"
+        fi
+
+        if ! [ -e NOTES.md ]; then
+            touch NOTES.md
+        fi
+        exec code . NOTES.md
     else
-        exec tmx "$workspace" "$@"
+        exec "$cmd" "$workspace" "$@"
     fi
 else
-    exec tmx "$workspace" "$@"
+    exec "$cmd" "$workspace" "$@"
 fi
