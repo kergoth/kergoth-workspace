@@ -1,0 +1,26 @@
+#!/bin/bash
+
+name="$(basename "$PWD")"
+if (echo "$name" | grep -Eqx "[a-zA-Z]+-[0-9]+" && has jira); then
+    if has jira-to-project && jira issue view --plain "$name" >/dev/null; then
+        jira-to-project "$PWD"
+    elif has jira-to-notes && jira issue view --plain "$name" >/dev/null; then
+        jira-to-notes "$name" >NOTES.md || :
+    elif has mel-project-issue-info && jira view "$name"; then
+        ( cd .. && mel-project-issue-info "$name" ) || :
+    fi
+fi
+
+if [ -s .jira-summary ] && ! [ -e NOTES.md ]; then
+    printf '# ' >>NOTES.md
+    cat .jira-summary >>NOTES.md
+
+    if has jira; then
+        echo >>NOTES.md
+        jira view "$name" | sed -e 's/^/    /' >>NOTES.md  || :
+    fi
+
+    if [ "$TERM_PROGRAM" = vscode ] && [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
+        code . NOTES.md
+    fi
+fi
