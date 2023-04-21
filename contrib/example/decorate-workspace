@@ -1,22 +1,33 @@
 #!/bin/sh
+
+usage() {
+    echo >&2 "${0##*/} [-a]"
+    exit 2
+}
+
+all_issues=0
+while getopts ah opt; do
+    case "$opt" in
+        a)
+            all_issues=1
+            ;;
+        \? | h)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
+
 if [ -z "$WORKSPACE_PROJECT_ROOT" ]; then
     WORKSPACE_PROJECT_ROOT="$PWD"
 fi
+
 while read -r workspace; do
     case "$workspace" in
         /*)
             workspacedir="$workspace"
-            case "$workspacedir" in
-                "$WORKSPACE_PROJECT_ROOT/"*)
-                    name="${workspacedir#$WORKSPACE_PROJECT_ROOT/}"
-                    ;;
-                *)
-                    name="${workspacedir##*/}"
-                    ;;
-            esac
             ;;
         *)
-            name="$workspace"
             listed="$("$(dirname "$0")"/list-workspaces | grep "/$workspace$" | head -n 1)"
             if [ -n "$listed" ]; then
                 workspacedir="$WORKSPACE_PROJECT_ROOT/$listed"
@@ -26,10 +37,23 @@ while read -r workspace; do
             ;;
     esac
 
+    if [ -s "$workspacedir/.jira-status" ]; then
+        issue_status="$(head -n 1 "$workspacedir/.jira-status" | xargs)"
+        if [ "$all_issues" -eq 0 ]; then
+            case "$issue_status" in
+                Closed|Resolved)
+                    continue
+                    ;;
+            esac
+        fi
+    else
+        issue_status=Unknown
+    fi
+
     if [ -s "$workspacedir/.description" ]; then
         description="$(head -n 1 "$workspacedir/.description")"
     elif [ -s "$workspacedir/.jira-summary" ]; then
-        description="$(head -n 1 "$workspacedir/.jira-summary")"
+        description="$(head -n 1 "$workspacedir/.jira-summary" | sed -e "s/MEL_FLEX_FIR: //")"
     elif [ -s "$workspacedir/.jira-description" ]; then
         description="$(head -n 1 "$workspacedir/.jira-description")"
     else
@@ -37,6 +61,9 @@ while read -r workspace; do
     fi
 
     printf '\e[38;5;117m%-20s' "$workspace"
+    if [ "$all_issues" -eq 1 ]; then
+        printf '\t\e[1;38;5;14m%s' "$issue_status"
+    fi
     printf '\t\e[1;38;5;84m%s' "$(date -r "$workspacedir/.workspace" +%Y-%m-%d\ %H:%M)"
     if [ -n "$description" ]; then
         printf '\t\e[38;5;212m%s' "$description"
