@@ -2,7 +2,7 @@
 
 has() {
     for cmd; do
-        command -v "$1" >/dev/null 2>&1 || return 1
+        command -v "$cmd" >/dev/null 2>&1 || return 1
     done
     return 0
 }
@@ -10,19 +10,24 @@ has() {
 workspace="$1"
 shift
 
-if has tmux tmx; then
-    cmd=tmx
-elif has dtach dvtm att; then
-    cmd=att
-else
-    echo >&2 "Error: neither tmx nor att environments are available for session, exiting"
+if [ -z "${ATTACH_WORKSPACE_CMD:-}" ]; then
+    if has tmux tmx; then
+        ATTACH_WORKSPACE_CMD=tmx
+    elif has dtach dvtm att; then
+        ATTACH_WORKSPACE_CMD=att
+    else
+        echo >&2 "Error: neither tmx nor att environments are available for session, exiting"
+        exit 1
+    fi
+elif ! has "$ATTACH_WORKSPACE_CMD"; then
+    echo >&2 "Error: ATTACH_WORKSPACE_CMD '$ATTACH_WORKSPACE_CMD': no such command"
     exit 1
 fi
 
 if [ "$TERM_PROGRAM" = vscode ] && [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
     if [ "$WORKSPACE_PICKING" = "1" ] || [ "$WORKSPACE_NEW" = "1" ]; then
         unset WORKSPACE_PICKING WORKSPACE_NEW
-        if [ "$cmd" = tmx ]; then
+        if [ "$ATTACH_WORKSPACE_CMD" = tmx ]; then
             tmx -d "$workspace" "$@"
         fi
 
@@ -31,8 +36,8 @@ if [ "$TERM_PROGRAM" = vscode ] && [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
         fi
         exec code . NOTES.md
     else
-        exec "$cmd" "$workspace" "$@"
+        exec "$ATTACH_WORKSPACE_CMD" "$workspace" "$@"
     fi
 else
-    exec "$cmd" "$workspace" "$@"
+    exec "$ATTACH_WORKSPACE_CMD" "$workspace" "$@"
 fi
